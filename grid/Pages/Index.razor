@@ -1,0 +1,104 @@
+﻿@inject IJSRuntime JsRuntime
+@page "/"
+
+<h1>Hello, world!</h1>
+
+<table class="grid">
+    <thead class="heading-row">
+        @foreach (Column column in Columns)
+        {
+        <th class="heading-cell">
+            @column.LayoutHeader
+        </th>
+    }
+        </thead>
+        <tbody class="grid-body">
+            @foreach (Order order in Orders)
+            {
+                <tr class="row" onclick="@OnRowClick">
+                    @foreach (Column column in Columns)
+                    {
+                        <td class="cell">
+                            @typeof(Order).GetProperty(column.Field).GetValue(order)
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @code {
+        private List<Column> Columns { get; set; } = new List<Column>();
+
+        private List<Order> Orders { get; set; } = new List<Order>();
+
+        class Column
+        {
+            public string Field { get; set; }
+            public string LayoutHeader { get; set; }
+        }
+
+        class Order
+        {
+            public string OrderName { get; set; }
+            public string StartDate { get; set; }
+            public int TasksAmount { get; set; }
+        }
+
+        protected override void OnInitialized()
+        {
+            Columns = new List<Column>();
+            Columns.AddRange(
+                new Column[]
+                {
+                new Column()
+                {
+                    Field = "OrderName",
+                    LayoutHeader = "Название заказа"
+                },
+                new Column()
+                {
+                    Field = "StartDate",
+                    LayoutHeader = "Дата открытия"
+                },
+                new Column()
+                {
+                    Field = "TasksAmount",
+                    LayoutHeader = "Количество заказов"
+                }
+                }
+            ); ;
+
+            Orders = new List<Order>();
+            Orders.AddRange(
+            new Order[]
+            {
+            new Order()
+            {
+                OrderName = "Смертельно важный заказ",
+                StartDate = "21/12/2023",
+                TasksAmount = 72
+            },
+             new Order()
+            {
+                OrderName = "Убийственно важный заказ",
+                StartDate = "21/12/2023",
+                TasksAmount = 78
+            },
+              new Order()
+            {
+                OrderName = "Клиент - идиот",
+                StartDate = "21/12/2023",
+                TasksAmount = 101010000
+            }
+            }
+        );
+        }
+
+        void OnRowClick()
+        {
+            JsRuntime.InvokeVoidAsync("alert", "Warning!");
+        }
+    }
+
+
