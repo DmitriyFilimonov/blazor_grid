@@ -7,28 +7,55 @@
     <thead class="heading-row">
         @foreach (Column column in Columns)
         {
-        <th class="heading-cell">
-            @column.LayoutHeader
-        </th>
-    }
-        </thead>
-        <tbody class="grid-body">
-            @foreach (Order order in Orders)
+            <th class="heading-cell">
+                @column.LayoutHeader
+            </th>
+        }
+    </thead>
+<tbody class="grid-body">
+    @foreach (Order order in Orders)
+    {
+        <tr class="row" onclick="@OnRowClick">
+            @foreach (Column column in Columns)
             {
-                <tr class="row" onclick="@OnRowClick">
-                    @foreach (Column column in Columns)
-                    {
-                        <td class="cell">
-                            @typeof(Order).GetProperty(column.Field).GetValue(order)
-                        </td>
-                    }
-                </tr>
+                <td class="cell">
+                    @typeof(Order).GetProperty(column.Field).GetValue(order)
+                </td>
             }
-        </tbody>
+        </tr>
+        <tr>
+            <table>
+                <thead class="heading-row">
+                    @foreach (Column column in SubTableColumns)
+                    {
+                        <th class="heading-cell">
+                            @column.LayoutHeader
+                        </th>
+                    }
+                </thead>
+                <tbody class="grid-body">
+                    @foreach (SubRow subRow in order.SubRows)
+                    {
+                        <tr class="row">
+                            @foreach (Column column in SubTableColumns)
+                            {
+                                <td class="cell">
+                                    @typeof(SubRow).GetProperty(column.Field).GetValue(subRow)
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </tr>
+}
+</tbody>
     </table>
 
     @code {
         private List<Column> Columns { get; set; } = new List<Column>();
+
+        private List<Column> SubTableColumns { get; set; } = new List<Column>();
 
         private List<Order> Orders { get; set; } = new List<Order>();
 
@@ -38,11 +65,18 @@
             public string LayoutHeader { get; set; }
         }
 
+        class SubRow
+        {
+            public int headerOne { get; set; }
+            public int headerTwo { get; set; }
+        }
+
         class Order
         {
             public string OrderName { get; set; }
             public string StartDate { get; set; }
             public int TasksAmount { get; set; }
+            public SubRow[] SubRows { get; set; }
         }
 
         protected override void OnInitialized()
@@ -69,6 +103,23 @@
                 }
             ); ;
 
+            SubTableColumns = new List<Column>();
+            SubTableColumns.AddRange(
+                new Column[]
+                {
+                    new Column()
+                    {
+                        Field = "headerOne",
+                        LayoutHeader = "Заголовок Раз"
+                    },
+                    new Column()
+                    {
+                        Field = "headerTwo",
+                        LayoutHeader = "Заголовок Два-с"
+                    },
+                }
+             );
+
             Orders = new List<Order>();
             Orders.AddRange(
             new Order[]
@@ -77,19 +128,34 @@
             {
                 OrderName = "Смертельно важный заказ",
                 StartDate = "21/12/2023",
-                TasksAmount = 72
+                TasksAmount = 72,
+                SubRows = new SubRow[]
+                {
+                    new SubRow()
+                    {
+                        headerOne = 20,
+                        headerTwo = 555,
+                    },
+                    new SubRow()
+                    {
+                        headerOne = 220,
+                        headerTwo = 2555,
+                    }
+                }
             },
-             new Order()
+            new Order()
             {
                 OrderName = "Убийственно важный заказ",
                 StartDate = "21/12/2023",
-                TasksAmount = 78
+                TasksAmount = 78,
+                SubRows = new SubRow[]{ }
             },
-              new Order()
+            new Order()
             {
                 OrderName = "Клиент - идиот",
                 StartDate = "21/12/2023",
-                TasksAmount = 101010000
+                TasksAmount = 101010000,
+                SubRows = new SubRow[]{ }
             }
             }
         );
